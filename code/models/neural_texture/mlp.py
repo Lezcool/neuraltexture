@@ -29,7 +29,7 @@ class MLP(nn.Module):
         self.last_conv = Conv2dBlock(self.n_featutres, self.nf_out, 1, 1, 0, None, None, model_param.dropout_ratio, bias=self.bias)
 
     def forward(self, input):
-
+        # print('*'*50,type(input),input.shape)
         input_z = self.first_conv(input)
         output = input_z
         for idx, block in enumerate(self.res_blocks):

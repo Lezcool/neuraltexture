@@ -107,7 +107,7 @@ class SystemNeuralTexture(CoreSystem):
         return loss
 
     def validation_step(self, batch, batch_nb):
-
+        #batch_nb = 0 , batch.shape = [16, 3, 128, 128]
         image_gt, image_out = self.forward_step(batch)
         loss = self.get_loss(image_gt, image_out, 'val')
         self.log(image_gt, image_out, 'val', force=True)
@@ -130,7 +130,8 @@ class SystemNeuralTexture(CoreSystem):
             sample_pos = utils_nt.get_position((self.image_res, self.image_res), self.p.dim, self.p.device, self.p.train.bs)
 
         weights, _ = self.parse_weights(image_gt)
-        image_out = self.forward(weights, sample_pos, seed)
+        image_out = self.forward(weights, sample_pos, seed) 
+        #torch.Size([16, 96, 1, 1]) torch.Size([16, 2, 128, 128]) torch.Size([16, 8, 3])
 
         return image_gt, image_out
 
@@ -186,7 +187,7 @@ class SystemNeuralTexture(CoreSystem):
             for i in range(self.n_seeds):
 
                 seed = torch.rand((self.p.train.bs, self.p.noise.octaves, self.p.texture.channels), device=self.p.device)
-
+                # print('*'*50,type(weights),type(position),type(seed))
                 image_out = self.forward(weights, position, seed)
 
                 vgg_features_gt = self.vgg_features(utils.signed_to_unsigned(image_gt))

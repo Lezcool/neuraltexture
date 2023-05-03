@@ -23,6 +23,7 @@ experiment_name = 'neural_texture'
 
 experiment_dir = root_dir / experiment_name
 version_dirs = [x for x in experiment_dir.iterdir() if x.is_dir()]
+# print(version_dirs)
 
 for idx, version_dir in enumerate(version_dirs):
     config_path = version_dir / 'logs' / 'config.txt'

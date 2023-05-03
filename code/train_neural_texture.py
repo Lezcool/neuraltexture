@@ -9,7 +9,7 @@ from utils.logger import Logger
 
 if __name__ == '__main__':
     experiment_name = 'neural_texture'
-    root_dir = Path().cwd() / '..' / 'trained_models'
+    root_dir = Path().cwd() / '..' / 'my_trained_models'
     param = load_config_train(root_dir, experiment_name)
     logger = Logger(param)
     system = SystemNeuralTexture(param)

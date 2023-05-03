@@ -2,7 +2,7 @@ from torch import nn
 import torch
 from models.core_layers import normalization, non_linearity
 
-
+import sys
 class StandardBlock(nn.Module):
     def __init__(self, type, nf_in, nf_out, kernel_size, stride, padding, norm_type=None, activation_type=None, dropout_ratio=0.0, bias=True, padding_mode='zeros'):
         super().__init__()
@@ -53,6 +53,8 @@ class StandardBlock(nn.Module):
             self.norm = norm(nf_out)
 
     def forward(self, input, style=None):
+        # print('*'*50,type(input))
+        # print(len(input),input.shape)
 
         if self.norm_type == 'specular':
             output = self.norm(input)

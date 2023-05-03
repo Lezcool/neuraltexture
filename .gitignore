@@ -9,3 +9,5 @@ trained_models/*
 .idea/
 train_neural_texture.sh
 __pycache__
+venvnt/*
+lowtorch/*
