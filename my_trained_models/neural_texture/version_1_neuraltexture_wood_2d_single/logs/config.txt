@@ -62,10 +62,10 @@ system:
       style_type: mse
 train:
   epochs: 3
-  bs: 16
+  bs: 1
   accumulate_grad_batches: 1
   seed: 41127
-root_dir: /home/lez/Documents/PhD/generative/neuraltexture/code/../my_trained_models
+root_dir: /home/lez/Documents/PhD/generative/neuraltexture/my_trained_models
 version_id: 1
 version: 1_neuraltexture_wood_2d_single
 experiment_name: neural_texture

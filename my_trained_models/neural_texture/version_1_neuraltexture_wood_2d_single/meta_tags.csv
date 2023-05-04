@@ -39,10 +39,10 @@ system.block_main.scheduler_params.name,none
 system.block_main.loss_params.style_weight,1.0
 system.block_main.loss_params.style_type,mse
 train.epochs,3
-train.bs,16
+train.bs,1
 train.accumulate_grad_batches,1
 train.seed,41127
-root_dir,/home/lez/Documents/PhD/generative/neuraltexture/code/../my_trained_models
+root_dir,/home/lez/Documents/PhD/generative/neuraltexture/my_trained_models
 version_id,1
 version,1_neuraltexture_wood_2d_single
 experiment_name,neural_texture

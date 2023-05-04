@@ -12,6 +12,7 @@ import numpy as np
 import csv
 import collections
 import argparse
+import sys
 
 parser = argparse.ArgumentParser(description='Evaluates all trained models given the root path')
 parser.add_argument('--trained_model_path', type=str, default='../trained_models', help='Path to root of trained models')
@@ -24,6 +25,7 @@ experiment_name = 'neural_texture'
 experiment_dir = root_dir / experiment_name
 version_dirs = [x for x in experiment_dir.iterdir() if x.is_dir()]
 # print(version_dirs)
+
 
 for idx, version_dir in enumerate(version_dirs):
     config_path = version_dir / 'logs' / 'config.txt'

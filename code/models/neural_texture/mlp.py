@@ -18,15 +18,19 @@ class MLP(nn.Module):
         self.n_blocks = model_param.n_blocks
         self.bias = model_param.bias
 
-        self.first_conv = Conv2dBlock(self.nf_in, self.n_featutres, 1, 1, 0, None, model_param.non_linearity, model_param.dropout_ratio, bias=self.bias)
+        # self.first_conv = Conv2dBlock(self.nf_in, self.n_featutres, 1, 1, 0, None, model_param.non_linearity, model_param.dropout_ratio, bias=self.bias)
+        self.first_conv =torch.nn.Conv2d(in_channels= self.nf_in,out_channels=self.n_featutres, kernel_size=1,stride=1,padding=0,bias=self.bias)
+
 
         self.res_blocks = nn.ModuleList()
 
         for idx in range(self.n_blocks):
-            block_i = Conv2dBlock(self.n_featutres, self.n_featutres, 1, 1, 0, None, model_param.non_linearity, model_param.dropout_ratio, bias=self.bias)
+            # block_i = Conv2dBlock(self.n_featutres, self.n_featutres, 1, 1, 0, None, model_param.non_linearity, model_param.dropout_ratio, bias=self.bias)
+            block_i = torch.nn.Conv2d(in_channels= self.n_featutres,out_channels=self.n_featutres, kernel_size=1,stride=1,padding=0,bias=self.bias)
             self.res_blocks.append(block_i)
 
-        self.last_conv = Conv2dBlock(self.n_featutres, self.nf_out, 1, 1, 0, None, None, model_param.dropout_ratio, bias=self.bias)
+        # self.last_conv = Conv2dBlock(self.n_featutres, self.nf_out, 1, 1, 0, None, None, model_param.dropout_ratio, bias=self.bias)
+        self.last_conv =torch.nn.Conv2d(in_channels= self.n_featutres,out_channels=self.nf_out, kernel_size=1,stride=1,padding=0,bias=self.bias)
 
     def forward(self, input):
         # print('*'*50,type(input),input.shape)

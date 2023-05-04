@@ -11,3 +11,4 @@ train_neural_texture.sh
 __pycache__
 venvnt/*
 lowtorch/*
+my_trained_models/*

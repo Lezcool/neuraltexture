@@ -30,7 +30,7 @@ class CoreSystem(pl.LightningModule):
     def validation_end(self, outputs):
 
         logs = {}
-        print('*'*50,'Here',outputs)
+        # print('*'*50,'Here',outputs)
         for key in outputs[0].keys():
             logs[key] = torch.stack([x[key] for x in outputs]).mean()
 

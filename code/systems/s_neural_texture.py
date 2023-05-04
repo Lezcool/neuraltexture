@@ -136,7 +136,7 @@ class SystemNeuralTexture(CoreSystem):
         return image_gt, image_out
 
     def get_loss(self, image_gt_cropped, image_out_shaded, mode='train'):
-
+        # image_gt_cropped: groundtruth
         loss_style = torch.tensor(0.0, device=self.p.device)
 
         vgg_features_out = self.vgg_features(utils.signed_to_unsigned(image_out_shaded))
@@ -148,7 +148,7 @@ class SystemNeuralTexture(CoreSystem):
             loss_style += self.p_system.block_main.loss_params.style_weight * self.loss_style_type(gram_matrix_out, gram_matrix_gt)
 
         if mode == 'train':
-            losses = {'loss': loss_style, 'progress_bar': {'loss': loss_style}, 'log': {'loss': loss_style}}
+            losses = {'loss': loss_style, 'progress_bar': {'loss2': loss_style}, 'log': {'loss3': loss_style}}
         else:
             losses = {'{}_loss'.format(mode): loss_style}
 
