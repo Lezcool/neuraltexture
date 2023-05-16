@@ -30,7 +30,8 @@ class CoreSystem(pl.LightningModule):
     def validation_end(self, outputs):
 
         logs = {}
-        # print('*'*50,'Here',outputs)
+        # print('*'*50,'Here',outputs) #error mean lack val folder in datasets
+
         for key in outputs[0].keys():
             logs[key] = torch.stack([x[key] for x in outputs]).mean()
 
@@ -166,7 +167,7 @@ class CoreSystem(pl.LightningModule):
         try:
             weights = [x for x in Path(model_save_path).glob('*.ckpt')]
             file = max(weights, key=os.path.getctime)
-
+            
             checkpoint = torch.load(file)
 
             model = cls(param)
@@ -180,5 +181,6 @@ class CoreSystem(pl.LightningModule):
             print('No checkpoint file available: {}/checkpoint.pkl'.format(file))
             quit()
         except ValueError:
+            
             print('No checkpoint found')
             quit()

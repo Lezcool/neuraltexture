@@ -9,6 +9,7 @@ import utils.neural_texture_helper as utils_nt
 import copy
 import json
 import kornia
+import sys
 
 
 class SystemNeuralTexture(CoreSystem):
@@ -18,7 +19,7 @@ class SystemNeuralTexture(CoreSystem):
 
         self.image_res = self.p.image.image_res
 
-        if self.p.dataset.use_single != -1:
+        if self.p.dataset.use_single != -1:  # use single texture??? 
             weight_size = self.p.texture.e + self.p.texture.t
             weights = torch.Tensor(1, weight_size, 1, 1).uniform_(-1.0, 1.0).to(self.p.device)
             self.register_parameter('weights', torch.nn.Parameter(weights))
@@ -27,7 +28,7 @@ class SystemNeuralTexture(CoreSystem):
             self.model_encoder_texture = self.models[0]
 
         self.model_texture_mlp = self.models[1]
-        self.loss_style_type = self.get_loss_type(self.p_system.block_main.loss_params.style_type)
+        self.loss_style_type = self.get_loss_type(self.p_system.block_main.loss_params.style_type) #choose loss type l1 or mse
 
         self.vgg_features = utils_nt.VGGFeatures()
         self.gram_matrix = utils_nt.GramMatrix()
@@ -63,7 +64,14 @@ class SystemNeuralTexture(CoreSystem):
         _, _, h, w = position.size()
         bs, _, w_h, w_w = weights.size()
 
-        transform_coeff, z_encoding = torch.split(weights, [self.p.texture.t, self.p.texture.e], dim=1)
+        try:
+            transform_coeff, z_encoding = torch.split(weights, [self.p.texture.t, self.p.texture.e], dim=1) # 134 -> 72,64
+        except:
+            # print(weights.shape)
+            # print(self.p.texture.t)
+            # print(self.p.texture.e)
+            print('use single: ',self.p.dataset.use_single)
+            raise ValueError
 
         z_encoding = z_encoding.view(bs, self.p.texture.e, 1, 1)
         z_encoding = z_encoding.expand(bs, self.p.texture.e, self.image_res, self.image_res)
@@ -139,9 +147,9 @@ class SystemNeuralTexture(CoreSystem):
         # image_gt_cropped: groundtruth
         loss_style = torch.tensor(0.0, device=self.p.device)
 
-        vgg_features_out = self.vgg_features(utils.signed_to_unsigned(image_out_shaded))
-        vgg_features_gt = self.vgg_features(utils.signed_to_unsigned(image_gt_cropped))
-        gram_matrices_gt = list(map(self.gram_matrix, vgg_features_gt))
+        vgg_features_out = self.vgg_features(utils.signed_to_unsigned(image_out_shaded)) #??why unsigned
+        vgg_features_gt = self.vgg_features(utils.signed_to_unsigned(image_gt_cropped)) 
+        gram_matrices_gt = list(map(self.gram_matrix, vgg_features_gt)) #通过提取 VGG 网络在源图像和目标图像上的特征，并计算这些特征的格拉姆矩阵，可以获得它们之间的风格表示。
         gram_matrices_out = list(map(self.gram_matrix, vgg_features_out))
 
         for gram_matrix_gt, gram_matrix_out in zip(gram_matrices_gt, gram_matrices_out):
@@ -203,13 +211,35 @@ class SystemNeuralTexture(CoreSystem):
                 out_path = result_dir / '{}_out.{}'.format(i, file_ending)
 
                 io.write_images(str(out_path), utils.signed_to_unsigned(image_out), 1)
+                print('*'*20,image_out.shape)
+
+                #3D volume
+                volume = []
+                position_volume = utils_nt.get_position((self.image_res, self.image_res), self.p.dim, self.p.device, self.p.train.bs)
+                #[1, 3, 128, 128]
+
+                for _ in range(image_out.shape[-1]):
+                    position_volume = torch.cat([position_volume[:, 0:2] , position_volume[:, 2]+2.0], dim=1)
+                    image_out = self.forward(weights, position_volume, seed).detach().cpu()
+                    image_out = utils.signed_to_unsigned(image_out)
+                    print(volume.shape)
+                    sys.exit()
+                    volume.append(image_out)
+                image_volume = torch.cat(volume, dim=3)
+                print('*'*20,image_volume.shape)
+                sys.exit()
+                io.write_images(str(result_dir / '{}_volume.tiff'.format(i)), image_volume)
+
+
 
                 ## stripe
                 image_stripe = []
-                position_stripe = utils_nt.get_position((self.image_res, self.image_res), self.p.dim, self.p.device, self.p.train.bs) + 1
+                position_stripe = utils_nt.get_position((self.image_res, self.image_res), self.p.dim, self.p.device, self.p.train.bs) + 1 
+                #input size, dim, device, batch_size; return batch_size, dim, height, width
 
                 for _ in range(self.strip_length):
-                    position_stripe = torch.cat([position_stripe[:, 0:1] + 2.0, position_stripe[:, 1:]], dim=1)
+                    position_stripe = torch.cat([position_stripe[:, 0:1] + 2.0, position_stripe[:, 1:]], dim=1) 
+                    #+2增加第1维的权重，等同position_stripe[:, 0:1] += 2.0
 
                     image_out = self.forward(weights, position_stripe, seed).detach().cpu()
                     image_out = utils.signed_to_unsigned(image_out)

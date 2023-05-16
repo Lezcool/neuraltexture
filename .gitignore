@@ -12,3 +12,4 @@ __pycache__
 venvnt/*
 lowtorch/*
 my_trained_models/*
+datasets/*

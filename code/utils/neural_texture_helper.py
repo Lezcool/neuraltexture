@@ -56,7 +56,7 @@ class VGGFeatures(torch.nn.Module):
 
 
 class GramMatrix(torch.nn.Module):
-
+    #计算输入张量的格拉姆矩阵（Gram Matrix）。
     def forward(self, input):
         b, c, h, w = input.size()
         features = input.view(b, c, h * w)
@@ -67,6 +67,19 @@ class GramMatrix(torch.nn.Module):
 
 
 def get_position(size, dim, device, batch_size):
+    '''
+    这个函数的作用是生成位置张量，用于表示图像上每个像素的位置信息。每次调用，value都会变。
+    函数的执行过程如下：
+    从 size 中获取图像的高度和宽度，并计算宽高比（aspect ratio）。
+    使用 kornia.utils.create_meshgrid 函数生成一个网格矩阵，表示图像上每个像素的坐标位置。这个网格矩阵的形状是 (height, width, 2)，其中最后一个维度表示 x 和 y 坐标。
+    对生成的网格矩阵进行一些处理。首先，将 y 坐标进行翻转，即乘以宽高比并取负值，以适应图像坐标系。然后，根据 dim 的值进行不同的处理。
+    如果 dim 等于 1，表示生成一维位置张量，则只保留 x 坐标部分，将位置张量的形状变为 (batch_size, 1, height, width)。
+    如果 dim 等于 3，表示生成三维位置张量，则需要在 x、y、z 坐标之间进行调换，并为 z 坐标赋予随机值，取值范围为 [-1, 1]。最后将 x、y、z 三个坐标合并，得到形状为 (batch_size, 3, height, width) 的位置张量。
+    将生成的位置张量进行扩展，使其形状变为 (batch_size, dim, height, width)，其中 batch_size 是批量大小，dim 是位置张量的维度。
+
+    这个函数的作用是为每个像素生成一个位置张量，该张量可以用于在图像处理或计算机视觉任务中，与其他特征进行融合或参考。位置张量可以提供图像上像素的空间信息，对于某些任务（如姿态估计、光流估计等）非常有用。
+    return batch_size, dim, height, width
+    '''
     height, width = size
     aspect_ratio = width / height
     position = kornia.utils.create_meshgrid(height, width, device=torch.device(device)).permute(0, 3, 1, 2)

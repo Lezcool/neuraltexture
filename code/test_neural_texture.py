@@ -16,18 +16,16 @@ import sys
 
 parser = argparse.ArgumentParser(description='Evaluates all trained models given the root path')
 parser.add_argument('--trained_model_path', type=str, default='../trained_models', help='Path to root of trained models')
+parser.add_argument('--once', action='store_true' ,default=False,help='Run only once')
+parser.add_argument('--experiment_name', type=str, default='neural_texture', help='Name of experiment')
 
 args = parser.parse_args()
 root_dir = Path(args.trained_model_path)
+experiment_name = args.experiment_name
+if args.once == True:
+    print("Running only once")
 
-experiment_name = 'neural_texture'
-
-experiment_dir = root_dir / experiment_name
-version_dirs = [x for x in experiment_dir.iterdir() if x.is_dir()]
-# print(version_dirs)
-
-
-for idx, version_dir in enumerate(version_dirs):
+    version_dir = root_dir
     config_path = version_dir / 'logs' / 'config.txt'
     param = load_config(root_dir, config_path)
     param['train']['bs'] = 1
@@ -39,6 +37,28 @@ for idx, version_dir in enumerate(version_dirs):
     exp.tag(utils.dict_to_keyvalue(param))
 
     trainer = Trainer(logger=logger, gpus=1, test_percent_check=1.0)
-
-    system = system.load_from_checkpoint(str(logger.run_dir / 'checkpoints'), param)
+    print(str(root_dir / 'checkpoints'))
+    system = system.load_from_checkpoint(str(root_dir / 'checkpoints'), param)
     trainer.test(system)
+else:
+
+
+    experiment_dir = root_dir / experiment_name
+    version_dirs = [x for x in experiment_dir.iterdir() if x.is_dir()]
+    # print(version_dirs)
+
+    for idx, version_dir in enumerate(version_dirs):
+        config_path = version_dir / 'logs' / 'config.txt'
+        param = load_config(root_dir, config_path)
+        param['train']['bs'] = 1
+        param['experiment_name'] = experiment_name
+        system = SystemNeuralTexture(param)
+        logger = Logger(param)
+
+        exp = Experiment(name=param.experiment_name, save_dir=param.root_dir, version=param.version, debug=False)
+        exp.tag(utils.dict_to_keyvalue(param))
+
+        trainer = Trainer(logger=logger, gpus=1, test_percent_check=1.0)
+
+        system = system.load_from_checkpoint(str(logger.run_dir / 'checkpoints'), param)
+        trainer.test(system)
